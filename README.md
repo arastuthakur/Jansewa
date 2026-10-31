@@ -110,6 +110,21 @@ npm run preview
 ```
 Generates an optimized, tree-shaken static production bundle in `dist/`.
 
+### 6. Deploy to Vercel
+The repository includes a ready-to-deploy [`vercel.json`](file:///c:/Users/arust/Desktop/AI/vercel.json) configured for Vite SPA routing, static asset immutability, and security headers.
+
+1. **Deploy with Vercel CLI**:
+   ```bash
+   npx vercel
+   ```
+2. **Deploy via GitHub / Vercel Dashboard**:
+   - Import your repository on [Vercel](https://vercel.com/new).
+   - Framework Preset: **Vite** (automatically detected).
+   - In **Project Settings -> Environment Variables**, add:
+     - `VITE_GEMINI_API_KEY`: Your Google AI Studio API key (`AQ...` or `AIza...`).
+     - `GEMINI_API`: Same key value.
+   - Click **Deploy**.
+
 ---
 
 ## 🔒 Security & Privacy Guarantees
