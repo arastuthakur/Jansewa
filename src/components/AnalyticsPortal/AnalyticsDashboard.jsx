@@ -456,6 +456,104 @@ export default function AnalyticsDashboard() {
           })}
         </div>
       </div>
+
+      {/* Municipal Revenue Realization Tracker (FY 2082/83 - KMC Budget) */}
+      <div style={{ background: "var(--bg)", padding: "26px", borderRadius: "var(--radius-lg)", boxShadow: "var(--neu-raised)", marginTop: "28px", marginBottom: "28px" }}>
+        <div className="section-header" style={{ marginBottom: "18px" }}>
+          <div>
+            <h3 style={{ fontSize: "1.1rem", display: "flex", alignItems: "center", gap: "8px", color: "var(--heading)" }}>
+              <TrendingUp size={20} color="var(--accent)" />
+              <span>{lang === "ne" ? "काठमाडौँ महानगरपालिका राजस्व संकलन लक्ष्य तथा प्रगति (आ.व. २०८२/८३)" : "KMC Municipal Revenue Target vs. Realization (FY 2082/83)"}</span>
+            </h3>
+            <p style={{ fontSize: "0.78rem", color: "var(--muted)", marginTop: "2px" }}>
+              Revenue streams categorized under Kathmandu Metropolitan City Local Revenue Act 2080.
+            </p>
+          </div>
+          <span className="portal-pill-badge" style={{ color: "var(--soft-sage-text)" }}>
+            कुल संकलन: ८४.५% लक्ष्य प्राप्ति
+          </span>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "16px" }}>
+          {[
+            { nameNe: "सम्पत्ति कर (Property Tax)", nameEn: "Property Tax", target: "४.२० अर्ब", realized: "३.४८ अर्ब", percent: 83, color: "var(--soft-sage-text)" },
+            { nameNe: "व्यवसाय तथा इजाजत कर (Business Tax)", nameEn: "Business Tax", target: "२.१० अर्ब", realized: "१.८४ अर्ब", percent: 87, color: "var(--accent)" },
+            { nameNe: "नक्सा पास तथा निर्माण दस्तुर (Building Permit)", nameEn: "Building Permits", target: "३.५० अर्ब", realized: "२.९२ अर्ब", percent: 83, color: "var(--soft-blue-text)" },
+            { nameNe: "फोहोर तथा सरसफाइ सेवा शुल्क (Sanitation)", nameEn: "Sanitation Surcharge", target: "१.२० अर्ब", realized: "१.०५ अर्ब", percent: 88, color: "var(--soft-amber-text)" }
+          ].map((item, idx) => (
+            <div key={idx} style={{ background: "var(--bg)", borderRadius: "var(--radius-md)", padding: "16px", boxShadow: "var(--neu-raised-sm)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                <strong style={{ fontSize: "0.85rem", color: "var(--heading)" }}>
+                  {lang === "ne" ? item.nameNe : item.nameEn}
+                </strong>
+                <span style={{ fontSize: "0.76rem", fontWeight: 700, color: item.color }}>
+                  {item.percent}%
+                </span>
+              </div>
+              <div style={{ background: "var(--bg)", boxShadow: "var(--neu-inset-sm)", height: "8px", borderRadius: "var(--radius-pill)", overflow: "hidden", marginBottom: "10px" }}>
+                <div style={{ width: `${item.percent}%`, height: "100%", background: item.color, borderRadius: "var(--radius-pill)" }}></div>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.74rem", color: "var(--muted)" }}>
+                <span>संकलित: <strong style={{ color: "var(--heading)" }}>{item.realized}</strong></span>
+                <span>लक्ष्य: {item.target}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Ward-wise Governance Performance Ranking Index (32 Wards of Kathmandu) */}
+      <div style={{ background: "var(--bg)", padding: "26px", borderRadius: "var(--radius-lg)", boxShadow: "var(--neu-raised)", marginBottom: "28px" }}>
+        <div className="section-header" style={{ marginBottom: "18px" }}>
+          <div>
+            <h3 style={{ fontSize: "1.1rem", display: "flex", alignItems: "center", gap: "8px", color: "var(--heading)" }}>
+              <BarChart3 size={20} color="var(--accent)" />
+              <span>{lang === "ne" ? "काठमाडौँ महानगर ३२ वडा सुशासन तथा कार्यसम्पादन वरीयता" : "Kathmandu Metropolitan 32 Wards Governance & Response Index"}</span>
+            </h3>
+            <p style={{ fontSize: "0.78rem", color: "var(--muted)", marginTop: "2px" }}>
+              Performance metrics evaluated under Good Governance Act 2064 citizen charter benchmarks.
+            </p>
+          </div>
+        </div>
+
+        <div className="table-responsive">
+          <table className="gov-table">
+            <thead>
+              <tr>
+                <th>वरीयता (Rank)</th>
+                <th>वडा विवरण (Ward & Location)</th>
+                <th>फछ्र्यौट दर (Resolution Rate)</th>
+                <th>औसत कार्यदिन (Avg Days)</th>
+                <th>नागरिक सन्तुष्टि (Citizen Rating)</th>
+                <th>डिजिटल सेवा स्तर (Grade)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { rank: "१", ward: "वडा नं ०४ (बालुवाटार / विशालनगर)", rate: "९७.४%", tat: "१.२ दिन", rating: "★ ४.९ / ५", grade: "A+ (उत्कृष्ट)" },
+                { rank: "२", ward: "वडा नं ०३ (महाराजगञ्ज / चक्रपथ)", rate: "९४.८%", tat: "१.५ दिन", rating: "★ ४.८ / ५", grade: "A (अग्रणी)" },
+                { rank: "३", ward: "वडा नं ०१ (नक्साल / नारायणचौर)", rate: "९२.१%", tat: "१.७ दिन", rating: "★ ४.७ / ५", grade: "A (अग्रणी)" },
+                { rank: "४", ward: "वडा नं ३१ (शान्तिनगर / आलोकनगर)", rate: "८९.६%", tat: "२.० दिन", rating: "★ ४.६ / ५", grade: "A- (राम्रो)" },
+                { rank: "५", ward: "वडा नं १६ (बालाजु / माछापोखरी)", rate: "८८.४%", tat: "२.१ दिन", rating: "★ ४.५ / ५", grade: "B+ (सन्तोषजनक)" },
+                { rank: "६", ward: "वडा नं १० (बानेश्वर / थापागाउँ)", rate: "८७.९%", tat: "२.३ दिन", rating: "★ ४.४ / ५", grade: "B+ (सन्तोषजनक)" }
+              ].map((w, idx) => (
+                <tr key={idx}>
+                  <td><strong style={{ fontFamily: "monospace", color: "var(--accent)" }}>#{w.rank}</strong></td>
+                  <td><strong>{w.ward}</strong></td>
+                  <td>
+                    <span className="status-badge status-approved">{w.rate}</span>
+                  </td>
+                  <td>{w.tat}</td>
+                  <td><span style={{ color: "#F59E0B", fontWeight: 700 }}>{w.rating}</span></td>
+                  <td>
+                    <span className="ai-chip">{w.grade}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

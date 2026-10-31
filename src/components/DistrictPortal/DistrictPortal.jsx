@@ -4,7 +4,14 @@ import {
   Landmark, 
   ShieldAlert, 
   FileCheck2, 
-  CheckCircle
+  CheckCircle,
+  Clock,
+  Radio,
+  Send,
+  AlertTriangle,
+  Siren,
+  ShieldCheck,
+  CheckCircle2
 } from "lucide-react";
 
 export default function DistrictPortal() {
@@ -16,6 +23,35 @@ export default function DistrictPortal() {
   );
 
   const [cdoRemarks, setCdoRemarks] = useState("");
+  const [incidents, setIncidents] = useState([
+    {
+      id: "inc-1",
+      titleNe: "विष्णुमती करिडोर बाढी सतर्कता तथा बस्ती अनुगमन",
+      titleEn: "Bishnumati River Corridor Inundation Alert",
+      units: "KMC Disaster Police + APF No. 20 Battallion",
+      status: "dispatched",
+      level: "Level 2 Alert",
+      time: "24 mins ago"
+    },
+    {
+      id: "inc-2",
+      titleNe: "माइतीघर-बानेश्वर सडकखण्ड भीभीआईपी सुरक्षा समन्वय",
+      titleEn: "Maitighar-Baneshwor VIP Corridor Route Management",
+      units: "Kathmandu Traffic Division + Nepal Police",
+      status: "active",
+      level: "Routine Protocol",
+      time: "1 hour ago"
+    },
+    {
+      id: "inc-3",
+      titleNe: "थानकोट-नागढुङ्गा प्रवेशद्वार सडक अवरोध हटाउने कार्य",
+      titleEn: "Nagdhunga Gateway Emergency Road Clearance",
+      units: "DoR Rapid Heavy Equipment Squad",
+      status: "resolved",
+      level: "Resolved",
+      time: "2 hours ago"
+    }
+  ]);
 
   const handleEndorseReferral = (app) => {
     updateApplicationStatus(
@@ -32,6 +68,11 @@ export default function DistrictPortal() {
     resolveComplaint(cmpId, "DAO Emergency Coordination Unit dispatched field response squad.");
   };
 
+  const handleDispatchOrder = (incId) => {
+    setIncidents(prev => prev.map(inc => inc.id === incId ? { ...inc, status: "dispatched", level: "Field Response Mobilized" } : inc));
+    showToast(lang === "ne" ? "सुरक्षा तथा उद्धार टोली परिचालन आदेश जारी भयो!" : "Inter-agency emergency dispatch orders transmitted!", "success");
+  };
+
   return (
     <div className="district-portal">
       {/* Title */}
@@ -42,13 +83,86 @@ export default function DistrictPortal() {
             <span>{t.dao.title}</span>
           </h2>
           <p style={{ fontSize: "0.82rem", color: "var(--muted)", marginTop: "3px" }}>
-            {t.dao.subtitle}
+            {t.dao.subtitle} • काठमाडौँ जिल्ला प्रशासन कार्यालय, बबरमहल
           </p>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span className="portal-pill-badge" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+            <Radio size={12} color="#10B981" />
+            <span>{lang === "ne" ? "जिल्ला कमान्ड नेटवर्क: सक्रिय" : "DAO Command Net: Live"}</span>
+          </span>
         </div>
       </div>
 
-      {/* Grid: Left = Escalated Referrals Queue, Right = District Emergency Grievances */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "28px" }}>
+      {/* DAO Inter-Agency Emergency Command Bar (District Disaster Management) */}
+      <div style={{ background: "var(--bg)", borderRadius: "var(--radius-lg)", padding: "22px", boxShadow: "var(--neu-raised)", marginBottom: "28px" }}>
+        <div className="section-header" style={{ marginBottom: "16px" }}>
+          <div>
+            <h3 style={{ fontSize: "1.05rem", display: "flex", alignItems: "center", gap: "8px", color: "var(--heading)" }}>
+              <Siren size={18} color="#EF4444" />
+              <span>{lang === "ne" ? "काठमाडौँ जिल्ला विपद् तथा सुरक्षा समन्वय कक्ष (DEOC)" : "Kathmandu District Emergency Operations Command (DEOC)"}</span>
+            </h3>
+            <p style={{ fontSize: "0.76rem", color: "var(--muted)", marginTop: "2px" }}>
+              Inter-agency coordination between Nepal Police, Armed Police Force (APF), and KMC Emergency Unit under Good Governance Act 2064.
+            </p>
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "14px" }}>
+          {incidents.map((inc) => (
+            <div
+              key={inc.id}
+              style={{
+                background: "var(--bg)",
+                borderRadius: "var(--radius-md)",
+                padding: "14px",
+                boxShadow: "var(--neu-raised-sm)",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                gap: "10px"
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                  <span style={{ fontSize: "0.68rem", fontWeight: 700, padding: "2px 8px", borderRadius: "var(--radius-pill)", background: inc.status === "resolved" ? "var(--soft-sage)" : "var(--soft-pink)", color: inc.status === "resolved" ? "var(--soft-sage-text)" : "var(--soft-pink-text)" }}>
+                    {inc.level}
+                  </span>
+                  <span style={{ fontSize: "0.7rem", color: "var(--muted)" }}>{inc.time}</span>
+                </div>
+                <h4 style={{ fontSize: "0.86rem", color: "var(--heading)", marginBottom: "4px" }}>
+                  {lang === "ne" ? inc.titleNe : inc.titleEn}
+                </h4>
+                <div style={{ fontSize: "0.74rem", color: "var(--muted)" }}>
+                  🛡️ {inc.units}
+                </div>
+              </div>
+
+              <div>
+                {inc.status === "active" ? (
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    style={{ width: "100%", fontSize: "0.74rem", padding: "6px" }}
+                    onClick={() => handleDispatchOrder(inc.id)}
+                  >
+                    <span>{lang === "ne" ? "टोली परिचालन आदेश (Dispatch)" : "Authorize Dispatch"}</span>
+                  </button>
+                ) : (
+                  <span style={{ fontSize: "0.72rem", color: "var(--soft-sage-text)", fontWeight: 600, display: "flex", alignItems: "center", gap: "4px" }}>
+                    <ShieldCheck size={13} />
+                    <span>{lang === "ne" ? "कार्यक्षेत्रमा टोली परिचालन भयो" : "Units Deployed On-Site"}</span>
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Grid: Left = Escalated Referrals Queue with Statutory 24-hr Countdown, Right = District Emergency Grievances */}
+      <div className="portal-two-col">
         {/* Referrals Section */}
         <div style={{ background: "var(--bg)", padding: "24px", borderRadius: "var(--radius-lg)", boxShadow: "var(--neu-raised)" }}>
           <div className="section-header">
@@ -70,11 +184,25 @@ export default function DistrictPortal() {
                     boxShadow: "var(--neu-raised-sm)"
                   }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "6px" }}>
                     <span style={{ fontFamily: "monospace", fontWeight: 700, color: "var(--heading)" }}>
                       {app.trackingId}
                     </span>
-                    <span className="status-badge status-referred">From Ward 04</span>
+                    <span className="status-badge status-referred">Ward 04 Escalation</span>
+                  </div>
+
+                  {/* 24-Hour Statutory SLA Countdown Progress */}
+                  <div style={{ background: "var(--bg)", boxShadow: "var(--neu-inset-sm)", padding: "8px 12px", borderRadius: "var(--radius-sm)", marginBottom: "12px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.72rem", marginBottom: "4px" }}>
+                      <span style={{ color: "var(--muted)", display: "flex", alignItems: "center", gap: "4px" }}>
+                        <Clock size={12} color="var(--accent)" />
+                        <span>सुशासन ऐन २०६४ सेवा प्रत्याभूति (Statutory 24h SLA):</span>
+                      </span>
+                      <strong style={{ color: "var(--accent)" }}>१८ घण्टा बाँकी (75% Time Remaining)</strong>
+                    </div>
+                    <div style={{ height: "6px", width: "100%", background: "rgba(208, 208, 208, 0.4)", borderRadius: "var(--radius-pill)", overflow: "hidden" }}>
+                      <div style={{ width: "75%", height: "100%", background: "#10B981", borderRadius: "var(--radius-pill)" }}></div>
+                    </div>
                   </div>
 
                   <h4 style={{ fontSize: "0.95rem", marginBottom: "4px" }}>
@@ -103,7 +231,7 @@ export default function DistrictPortal() {
                     <button
                       type="button"
                       className="btn btn-emerald"
-                      style={{ fontSize: "0.76rem", padding: "6px 14px" }}
+                      style={{ fontSize: "0.76rem", padding: "6px 14px", gap: "6px" }}
                       onClick={() => handleEndorseReferral(app)}
                     >
                       <CheckCircle size={14} />
@@ -183,3 +311,4 @@ export default function DistrictPortal() {
     </div>
   );
 }
+

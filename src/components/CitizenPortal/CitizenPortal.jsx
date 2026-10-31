@@ -13,9 +13,14 @@ import {
   Sparkles,
   Award,
   Volume2,
-  X
+  X,
+  Printer
 } from "lucide-react";
 import WardExplorer from "./WardExplorer";
+import MunicipalRevenueCalculator from "./MunicipalRevenueCalculator";
+import WardEmergencyDirectory from "./WardEmergencyDirectory";
+import CitizenFeedbackSection from "./CitizenFeedbackSection";
+import RegistrationSlipModal from "./RegistrationSlipModal";
 
 export default function CitizenPortal() {
   const { 
@@ -36,6 +41,7 @@ export default function CitizenPortal() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [quickTrackInput, setQuickTrackInput] = useState("");
+  const [selectedAppForSlip, setSelectedAppForSlip] = useState(null);
 
   const filteredServices = services.filter((s) => {
     const term = searchTerm.toLowerCase();
@@ -253,6 +259,12 @@ export default function CitizenPortal() {
       {/* Kathmandu Wards Status Explorer (Open Source Interactive Element) */}
       <WardExplorer />
 
+      {/* Municipal Revenue & Fee Estimator (Local Government Operation Act 2074 & KMC Act 2080) */}
+      <MunicipalRevenueCalculator />
+
+      {/* Ward 04 & KMC Emergency Helpline Directory */}
+      <WardEmergencyDirectory />
+
       {/* My Submitted Applications */}
       <div className="section-header" style={{ marginTop: "40px" }}>
         <h3 className="section-title">
@@ -303,11 +315,11 @@ export default function CitizenPortal() {
                   </span>
                 </td>
                 <td>
-                  <div style={{ display: "flex", gap: "6px" }}>
+                  <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                     <button
                       type="button"
                       className="btn btn-secondary"
-                      style={{ padding: "5px 12px", fontSize: "0.76rem" }}
+                      style={{ padding: "5px 10px", fontSize: "0.74rem" }}
                       onClick={() => {
                         setSearchTrackingId(app.trackingId);
                         setActiveTab("tracking");
@@ -315,11 +327,21 @@ export default function CitizenPortal() {
                     >
                       Track
                     </button>
+                    <button
+                      type="button"
+                      className="btn btn-outline"
+                      style={{ padding: "5px 10px", fontSize: "0.74rem", gap: "4px" }}
+                      onClick={() => setSelectedAppForSlip(app)}
+                      title="View / Print Digital Acknowledgment Slip"
+                    >
+                      <Printer size={12} color="var(--accent)" />
+                      <span>{lang === "ne" ? "निस्सा" : "Slip"}</span>
+                    </button>
                     {app.status === "approved" && (
                       <button
                         type="button"
                         className="btn btn-emerald"
-                        style={{ padding: "5px 12px", fontSize: "0.76rem" }}
+                        style={{ padding: "5px 10px", fontSize: "0.74rem" }}
                         onClick={() => setSelectedAppForCertificate(app)}
                         title="View Official Certificate"
                       >
@@ -336,7 +358,7 @@ export default function CitizenPortal() {
       </div>
 
       {/* Two-Column Bottom: Public Complaints & Ward Notices */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "28px" }}>
+      <div className="portal-two-col" style={{ marginBottom: "32px" }}>
         {/* Complaints Section */}
         <div style={{ background: "var(--bg)", padding: "24px", borderRadius: "var(--radius-lg)", boxShadow: "var(--neu-raised)" }}>
           <div className="section-header">
@@ -438,6 +460,17 @@ export default function CitizenPortal() {
           </div>
         </div>
       </div>
+
+      {/* Citizen Feedback Survey (Good Governance Act 2064, Section 84) */}
+      <CitizenFeedbackSection />
+
+      {/* Printable Registration Slip Modal */}
+      {selectedAppForSlip && (
+        <RegistrationSlipModal
+          app={selectedAppForSlip}
+          onClose={() => setSelectedAppForSlip(null)}
+        />
+      )}
     </div>
   );
 }

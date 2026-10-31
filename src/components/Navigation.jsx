@@ -10,7 +10,14 @@ import {
 } from "lucide-react";
 
 export default function Navigation() {
-  const { activeTab, setActiveTab, t } = useApp();
+  const { activeTab, setActiveTab, setRole, t } = useApp();
+
+  const handleNavClick = (tab, targetRole) => {
+    setActiveTab(tab);
+    if (targetRole) {
+      setRole(targetRole);
+    }
+  };
 
   return (
     <nav className="secondary-nav" aria-label="Portal Sections">
@@ -18,7 +25,7 @@ export default function Navigation() {
         <button
           type="button"
           className={`nav-item ${activeTab === "portal" ? "active" : ""}`}
-          onClick={() => setActiveTab("portal")}
+          onClick={() => handleNavClick("portal", "citizen")}
           aria-current={activeTab === "portal" ? "page" : undefined}
         >
           <Users size={15} />
@@ -28,7 +35,7 @@ export default function Navigation() {
         <button
           type="button"
           className={`nav-item ${activeTab === "staff" ? "active" : ""}`}
-          onClick={() => setActiveTab("staff")}
+          onClick={() => handleNavClick("staff", "ward_staff")}
           aria-current={activeTab === "staff" ? "page" : undefined}
         >
           <ClipboardList size={15} />
@@ -38,7 +45,7 @@ export default function Navigation() {
         <button
           type="button"
           className={`nav-item ${activeTab === "district" ? "active" : ""}`}
-          onClick={() => setActiveTab("district")}
+          onClick={() => handleNavClick("district", "district_officer")}
           aria-current={activeTab === "district" ? "page" : undefined}
         >
           <Landmark size={15} />
@@ -48,7 +55,7 @@ export default function Navigation() {
         <button
           type="button"
           className={`nav-item ${activeTab === "analytics" ? "active" : ""}`}
-          onClick={() => setActiveTab("analytics")}
+          onClick={() => handleNavClick("analytics", "municipality_admin")}
           aria-current={activeTab === "analytics" ? "page" : undefined}
         >
           <BarChart3 size={15} />
@@ -58,7 +65,7 @@ export default function Navigation() {
         <button
           type="button"
           className={`nav-item ${activeTab === "tracking" ? "active" : ""}`}
-          onClick={() => setActiveTab("tracking")}
+          onClick={() => handleNavClick("tracking", "citizen")}
           aria-current={activeTab === "tracking" ? "page" : undefined}
         >
           <FileSearch size={15} />
@@ -68,7 +75,7 @@ export default function Navigation() {
         <button
           type="button"
           className={`nav-item ${activeTab === "chatbot" ? "active" : ""}`}
-          onClick={() => setActiveTab("chatbot")}
+          onClick={() => handleNavClick("chatbot", "citizen")}
           aria-current={activeTab === "chatbot" ? "page" : undefined}
           style={{ color: "var(--accent)" }}
         >

@@ -7,8 +7,10 @@ import {
   Sparkles, 
   Award,
   History,
-  AlertCircle
+  AlertCircle,
+  Printer
 } from "lucide-react";
+import RegistrationSlipModal from "./RegistrationSlipModal";
 
 export default function ApplicationTracker() {
   const { 
@@ -21,6 +23,7 @@ export default function ApplicationTracker() {
   } = useApp();
 
   const [inputVal, setInputVal] = useState(searchTrackingId || applications[0]?.trackingId || "");
+  const [isSlipOpen, setIsSlipOpen] = useState(false);
 
   const activeApp = applications.find(
     (a) => a.trackingId.toLowerCase() === inputVal.trim().toLowerCase()
@@ -125,17 +128,30 @@ export default function ApplicationTracker() {
               </p>
             </div>
 
-            {activeApp.status === "approved" && (
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
               <button
                 type="button"
-                className="btn btn-emerald"
-                onClick={() => setSelectedAppForCertificate(activeApp)}
-                style={{ padding: "10px 18px" }}
+                className="btn btn-secondary"
+                onClick={() => setIsSlipOpen(true)}
+                style={{ padding: "10px 18px", gap: "6px" }}
+                title="Print Official KMC Acknowledgment Slip"
               >
-                <Award size={16} />
-                <span>Download Official Certificate</span>
+                <Printer size={15} color="var(--accent)" />
+                <span>{lang === "ne" ? "दर्ता निस्सा प्रिन्ट" : "Print Official Slip"}</span>
               </button>
-            )}
+
+              {activeApp.status === "approved" && (
+                <button
+                  type="button"
+                  className="btn btn-emerald"
+                  onClick={() => setSelectedAppForCertificate(activeApp)}
+                  style={{ padding: "10px 18px" }}
+                >
+                  <Award size={16} />
+                  <span>Download Official Certificate</span>
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Pipeline Visual Stepper (Neumorphic Inset Tray) */}
@@ -288,6 +304,13 @@ export default function ApplicationTracker() {
           <h3 style={{ fontSize: "1.1rem" }}>No Application Found</h3>
           <p style={{ color: "var(--muted)", fontSize: "0.85rem" }}>Please verify your tracking code and try again.</p>
         </div>
+      )}
+      {/* Registration Slip Modal */}
+      {isSlipOpen && activeApp && (
+        <RegistrationSlipModal
+          app={activeApp}
+          onClose={() => setIsSlipOpen(false)}
+        />
       )}
     </div>
   );

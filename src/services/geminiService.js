@@ -3,46 +3,111 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 // Government service knowledge base for RAG grounding
 const NEPAL_GOV_KNOWLEDGE_BASE = `
 You are JanSewa Sathi (जनसेवा साथी), an official assistive AI service agent for the JanSewa AI Nepal platform.
-Your duty is to assist citizens and municipal staff navigating Nepal local government services (वडा कार्यालय, नगरपालिका, र जिल्ला प्रशासन कार्यालय).
-Follow the Local Government Operation Act 2074 (स्थानीय सरकार सञ्चालन ऐन, २०७४) and Nepal Citizenship Act.
+Your duty is to assist citizens, municipal staff, and ward officers navigating Nepal local government services (वडा कार्यालय, नगरपालिका, र जिल्ला प्रशासन कार्यालय).
+Ground all answers strictly in prevailing Nepal Laws:
+- Local Government Operation Act 2074 (स्थानीय सरकार सञ्चालन ऐन, २०७४)
+- Public Road Act 2031 (सार्वजनिक सडक ऐन, २०३१)
+- Nepal Citizenship Act 2063 & Regulations (नेपाल नागरिकता ऐन, २०६३)
+- Individual Event Registration Act 2033 (व्यक्तिगत घटना दर्ता ऐन, २०३३)
+- Kathmandu Metropolitan City Building By-laws & Municipal Revenue Act 2080
 
-Key Service Rules:
-1. Citizenship Recommendation (नागरिकता प्रमाणपत्र सिफारिस):
-   - Office: Ward Office (वडा कार्यालय) then District Administration Office (DAO / जि.प्र.का.).
-   - Requirements: Parents' citizenship copy (आमाबुबाको नागरिकता), birth registration certificate (जन्मदर्ता प्रमाणपत्र), 3 passport photos, and physical presence of father/mother or verified legal guardian.
-   - Fee: NPR 100 at Ward Office. Processing time: 1-2 days.
+Key Statutory Rules & Legal Frameworks:
+1. Nepal Road Laws & Public Roads (सडक सम्बन्धी नेपाल कानून):
+   - Public Road Act 2031 (सार्वजनिक सडक ऐन, २०३१):
+     * Defines public road classifications: National Highways (राष्ट्रिय राजमार्ग), Feeder Roads (सहायक मार्ग), District Roads, and Urban/Municipal Roads.
+     * Road Right-of-Way (RoW / सडक सीमा): Prohibits encroachment, permanent construction, or unauthorized excavation within road boundaries.
+     * Department of Roads (सडक विभाग - DoR) manages national highways and strategic roads.
+     * Road Digging / Cutting Permission (सडक खन्ने अनुमति): Mandatory prior permit from road authority (KMC Infrastructure Division / DoR) with reinstatement guarantee fees before laying water pipelines, sewage, or telecom cables.
+   - Local Government Operation Act 2074 (स्थानीय सरकार सञ्चालन ऐन, २०७४) Sec 11 & 12:
+     * Municipalities and Ward Committees have sole authority (एकल अधिकार) over local municipal roads (नगर/गाउँस्तरीय सडक), ward access roads, rural roads, and agricultural roads (कृषि सडक).
+     * Ward Committee Responsibilities: Road maintenance, pothole repairs, street drainage, public footpath encroachment clearance, and streetlight maintenance.
+   - Public Grievances on Roads: Potholes, road collapses, or drainage overflow can be lodged via JanSewa 'Lodge Complaint' or KMC Call Center 1180.
 
-2. Residence Verification (बसोबास प्रमाणित सिफारिस):
-   - Office: Ward Office.
-   - Requirements: Land ownership deed (Lalpurja - लालपुर्जा) or registered house rent contract (बहाल सम्झौता), property tax receipt of current fiscal year (चालु आ.व. को कर रसिद), citizenship copy, and utility bill (water/electricity).
-   - Fee: NPR 200. Processing time: Same day or 1 day.
+2. Citizenship Recommendation (नागरिकता प्रमाणपत्र सिफारिस):
+   - Authority: Ward Office recommendation -> District Administration Office (DAO / जिल्ला प्रशासन कार्यालय) issuance.
+   - Types: By Descent (वंशज), Matrimonial Naturalization (वैवाहिक अंगीकृत), and Non-Resident Nepali (गैर-आवासीय नेपाली नागरिकता - NRN).
+   - Requirements: Parents' citizenship copies, verified birth registration certificate (जन्मदर्ता), 3 passport photos, physical presence of father/mother or verified guardian for identification (सनाखत).
+   - Fee: NPR 100 at Ward Office. Turnaround: 1-2 working days.
 
-3. Property & Business Tax Clearance (कर चुक्ता प्रमाणपत्र):
-   - Office: Ward Revenue Desk / Municipality.
-   - Requirements: Latest property valuation document, past tax receipts, citizenship copy.
-   - Fee: NPR 500.
+3. Residence Verification (बसोबास प्रमाणित सिफारिस):
+   - Permanent Residence: Land ownership deed (लालपुर्जा), current fiscal year property tax receipt (चालु आ.व. को सम्पत्ति कर चुक्ता), citizenship copy, utility bill.
+   - Temporary / Tenant Residence: 1-year registered rent agreement (बहाल सम्झौता), house owner's citizenship and Lalpurja copy, applicant citizenship.
+   - Fee: NPR 200. Turnaround: Same day or 1 working day.
 
-4. Birth Registration (जन्म दर्ता सिफारिस):
-   - Free if registered within 35 days of birth.
-   - Requirements: Hospital birth discharge summary, parents' citizenship copies, parents' marriage certificate.
+4. Vital Event Registrations (व्यक्तिगत घटना दर्ता):
+   - Birth (जन्म), Death (मृत्यु), Marriage (विवाह), Migration (बसाइँसराइ), Divorce (सम्बन्ध विच्छेद).
+   - Statutory Period: FREE (निःशुल्क) if registered within 35 days of the event under Vital Event Registration Act 2033. Nominal late fine applies after 35 days.
 
-5. Small Business / Trade License (व्यवसाय दर्ता):
-   - Office: Ward Office & Municipal Economic Development Department.
-   - Requirements: Business premises rent agreement or Lalpurja, proprietor citizenship copy, PAN/VAT certificate, 2 photos.
-   - Fee: NPR 1,500 - 3,000 depending on capital.
+5. Building Permit & Map Approval (नक्सा पास):
+   - Regulated by Local Government Operation Act 2074 Sec 27-45 and KMC Building By-laws.
+   - 5-Stage Process: Application with Lalpurja & blueprint by registered civil engineer -> 15-day neighbor notice (सन्धिसर्पन सूचना) -> Temporary Plinth-level permit -> Structural super-structure check -> Final Building Completion Certificate (निर्माण सम्पन्न प्रमाणपत्र).
 
-Guidelines for response:
-- Answer in the same language as the user query (Nepali Devanagari, English, or Romanized Nepali).
-- Cite specific required documents, expected fees in NPR, and estimated working days.
-- Include a warm respectful greeting (e.g., "नमस्ते!" or "Namaste").
-- If a question is outside Nepal local government scope, politely clarify that you are restricted to public administrative matters.
-- Provide clear bullet points for document checklists.
+6. Municipal Taxes & Trade Licenses:
+   - House Rent Tax (घरबहाल कर): 10% strictly payable to the Local Ward / Municipality under KMC Revenue Act 2080.
+   - Small Business Registration (व्यवसाय दर्ता): NPR 1,500 - 5,000 depending on capital; requires rental agreement, PAN, and proprietor citizenship.
+
+7. Judicial Committee & Ward Mediation (न्यायिक समिति):
+   - Headed by Deputy Mayor / Vice-Chairperson under Local Government Operation Act 2074 Chapter 8.
+   - Handles boundary disputes, tenant issues, family partition, and community harmony via court-annexed mediation.
+
+Response Guidelines:
+- Respond in the language of the query (Nepali Devanagari, English, or Romanized Nepali).
+- Cite specific acts, statutory sections, fees, required documents, and government offices.
+- Provide structured markdown lists and clear headings.
+- Maintain a warm, respectful, and authoritative tone (e.g., "नमस्ते!" or "Namaste").
 `;
+
+// Candidate models in preference order (gemini-2.5-flash is active for this workspace key)
+const CANDIDATE_MODELS = [
+  "gemini-2.5-flash",
+  "gemini-1.5-flash",
+  "gemini-2.0-flash",
+  "gemini-1.5-pro",
+  "gemini-pro"
+];
+
+let cachedWorkingModel = "gemini-2.5-flash";
+
+/**
+ * Robust caller that tries candidate models if a 404 / unsupported model error occurs
+ */
+async function callGeminiWithFallback(apiKey, runner) {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const modelsToTry = [
+    cachedWorkingModel,
+    ...CANDIDATE_MODELS.filter((m) => m !== cachedWorkingModel)
+  ];
+
+  let lastErr = null;
+  for (const modelName of modelsToTry) {
+    try {
+      const res = await runner(genAI, modelName);
+      cachedWorkingModel = modelName;
+      return res;
+    } catch (err) {
+      lastErr = err;
+      const msg = (err?.message || "").toLowerCase();
+      const isModelMissing =
+        msg.includes("404") ||
+        msg.includes("not found") ||
+        msg.includes("no longer available") ||
+        msg.includes("is not supported") ||
+        msg.includes("update your code");
+
+      if (!isModelMissing) {
+        // Quota, auth, or safety block — do not cycle model names
+        throw err;
+      }
+      console.warn(`[GeminiService] Model ${modelName} unavailable. Trying next candidate...`);
+    }
+  }
+  throw lastErr;
+}
 
 export function getStoredGeminiKey() {
   const localKey = typeof localStorage !== "undefined" ? localStorage.getItem("jansewa_gemini_api_key") : null;
   const viteKey = typeof import.meta !== "undefined" && import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : null;
-  const procKey = typeof process !== "undefined" && process.env ? process.env.GEMINI_API : null;
+  const procKey = typeof process !== "undefined" && process.env ? (process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API) : null;
   return (localKey || viteKey || procKey || "").trim();
 }
 
@@ -61,15 +126,14 @@ export async function analyzeDocumentWithGemini(fileData, serviceContext) {
   const apiKey = getStoredGeminiKey();
 
   if (!apiKey) {
-    // High-fidelity fallback simulated analysis if key is not yet provided
     return simulateDocumentAnalysis(fileData, serviceContext);
   }
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    return await callGeminiWithFallback(apiKey, async (genAI, modelName) => {
+      const model = genAI.getGenerativeModel({ model: modelName });
 
-    const prompt = `
+      const prompt = `
 Analyze this submitted document for Nepal Municipal Public Service: "${serviceContext?.titleEn || 'Public Service'}".
 Required documents for this service are:
 ${serviceContext?.requiredDocs?.join("\n") || "Standard Government Identification"}
@@ -98,25 +162,25 @@ Return ONLY a strict JSON object with this schema:
 }
 `;
 
-    let result;
-    if (fileData.base64 && fileData.mimeType) {
-      const imagePart = {
-        inlineData: {
-          data: fileData.base64.split(",")[1] || fileData.base64,
-          mimeType: fileData.mimeType
-        }
-      };
-      result = await model.generateContent([prompt, imagePart]);
-    } else {
-      result = await model.generateContent(`${prompt}\n\nDocument details:\nFile name: ${fileData.name}\nType: ${fileData.type}`);
-    }
+      let result;
+      if (fileData.base64 && fileData.mimeType) {
+        const imagePart = {
+          inlineData: {
+            data: fileData.base64.split(",")[1] || fileData.base64,
+            mimeType: fileData.mimeType
+          }
+        };
+        result = await model.generateContent([prompt, imagePart]);
+      } else {
+        result = await model.generateContent(`${prompt}\n\nDocument details:\nFile name: ${fileData.name}\nType: ${fileData.type}`);
+      }
 
-    const text = result.response.text();
-    // Parse json from markdown code fences if present
-    const cleanedJson = text.replace(/```json/g, "").replace(/```/g, "").trim();
-    return JSON.parse(cleanedJson);
+      const text = result.response.text();
+      const cleanedJson = text.replace(/```json/g, "").replace(/```/g, "").trim();
+      return JSON.parse(cleanedJson);
+    });
   } catch (err) {
-    console.warn("Gemini Live Document Analysis failed or rate limited, using simulated fallback:", err);
+    console.warn("Gemini Live Document Analysis fallback to simulated engine:", err);
     return simulateDocumentAnalysis(fileData, serviceContext, err.message);
   }
 }
@@ -126,7 +190,6 @@ function simulateDocumentAnalysis(fileData, serviceContext, errMsg = null) {
   const isBirth = fileName.includes("birth") || fileName.includes("hospital");
   const isLalpurja = fileName.includes("lalpurja") || fileName.includes("land");
   const isTax = fileName.includes("tax") || fileName.includes("rasid");
-  const isCitizen = fileName.includes("citizen") || fileName.includes("nagarikta");
 
   let docType = "Official Identity / Supporting Record";
   let fields = {
@@ -190,149 +253,294 @@ export async function askJanSewaSathi(userQuery, conversationHistory = []) {
   }
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-      systemInstruction: NEPAL_GOV_KNOWLEDGE_BASE
-    });
+    return await callGeminiWithFallback(apiKey, async (genAI, modelName) => {
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        systemInstruction: NEPAL_GOV_KNOWLEDGE_BASE
+      });
 
-    // Format chat history strictly adhering to Gemini API specification:
-    // 1. History MUST start with role: "user" (initial bot greeting must be dropped).
-    // 2. Roles MUST alternate between "user" and "model".
-    // 3. History must end with "model" so sendMessage is the next "user" turn.
-    const rawHistory = (conversationHistory || []).map((msg) => ({
-      role: msg.sender === "user" ? "user" : "model",
-      text: msg.text || ""
-    }));
+      // Format chat history strictly adhering to Gemini API specification:
+      // 1. History MUST start with role: "user" (initial bot greeting must be dropped).
+      // 2. Roles MUST alternate between "user" and "model".
+      // 3. History must end with "model" so sendMessage is the next "user" turn.
+      const rawHistory = (conversationHistory || []).map((msg) => ({
+        role: msg.sender === "user" ? "user" : "model",
+        text: msg.text || ""
+      }));
 
-    const firstUserIndex = rawHistory.findIndex((m) => m.role === "user");
-    const formattedHistory = [];
+      const firstUserIndex = rawHistory.findIndex((m) => m.role === "user");
+      const formattedHistory = [];
 
-    if (firstUserIndex !== -1) {
-      const candidates = rawHistory.slice(firstUserIndex);
-      for (const item of candidates) {
-        if (!item.text.trim()) continue;
-        if (formattedHistory.length === 0) {
-          if (item.role === "user") {
-            formattedHistory.push({
-              role: "user",
-              parts: [{ text: item.text }]
-            });
-          }
-        } else {
-          const lastRole = formattedHistory[formattedHistory.length - 1].role;
-          if (item.role !== lastRole) {
-            formattedHistory.push({
-              role: item.role,
-              parts: [{ text: item.text }]
-            });
+      if (firstUserIndex !== -1) {
+        const candidates = rawHistory.slice(firstUserIndex);
+        for (const item of candidates) {
+          if (!item.text.trim()) continue;
+          if (formattedHistory.length === 0) {
+            if (item.role === "user") {
+              formattedHistory.push({
+                role: "user",
+                parts: [{ text: item.text }]
+              });
+            }
+          } else {
+            const lastRole = formattedHistory[formattedHistory.length - 1].role;
+            if (item.role !== lastRole) {
+              formattedHistory.push({
+                role: item.role,
+                parts: [{ text: item.text }]
+              });
+            }
           }
         }
       }
-    }
 
-    // Ensure history ends with 'model' turn so chat.sendMessage(userQuery) provides the subsequent 'user' turn
-    if (formattedHistory.length > 0 && formattedHistory[formattedHistory.length - 1].role === "user") {
-      formattedHistory.pop();
-    }
+      // Ensure history ends with 'model' turn
+      if (formattedHistory.length > 0 && formattedHistory[formattedHistory.length - 1].role === "user") {
+        formattedHistory.pop();
+      }
 
-    const chat = model.startChat({
-      history: formattedHistory
+      const chat = model.startChat({
+        history: formattedHistory
+      });
+
+      const result = await chat.sendMessage(userQuery);
+      return {
+        text: result.response.text(),
+        isSimulated: false
+      };
     });
-
-    const result = await chat.sendMessage(userQuery);
-    return {
-      text: result.response.text(),
-      isSimulated: false
-    };
   } catch (err) {
     console.warn("JanSewa Sathi live API request fallback to verified municipal knowledge:", err);
-    // Provide clean, authoritative grounded answer without leaking internal debugging notes
     return simulateJanSewaSathi(userQuery);
   }
 }
 
+/**
+ * High-fidelity, authoritative Nepali & English municipal knowledge fallback engine.
+ * Covers Public Road Act 2031, Local Government Operation Act 2074, Citizenship,
+ * Building Permits, Vital Events, Municipal Taxes, and Complaints.
+ */
 function simulateJanSewaSathi(query) {
-  const q = query.toLowerCase();
+  const q = (query || "").toLowerCase();
 
-  if (q.includes("nagarikta") || q.includes("citizenship") || q.includes("नागरिकता")) {
+  // 1. Greetings ("Hi", "Hello", "नमस्ते", "नमस्कार")
+  if (
+    q === "hi" || 
+    q === "hello" || 
+    q === "namaste" || 
+    q === "नमस्ते" || 
+    q === "नमस्ते!" || 
+    q === "नमस्कार" ||
+    q.startsWith("hi ") ||
+    q.startsWith("hello ")
+  ) {
     return {
-      text: `नमस्ते! नयाँ नागरिकता सिफारिस (Citizenship Recommendation) का लागि वडा कार्यालयमा निम्न कागजातहरू आवश्यक पर्दछन्:
+      text: `नमस्ते! म **जनसेवा साथी (JanSewa Sathi)** हुँ, नेपाल सरकारको स्थानीय तह तथा वडा सेवा सहायक।
 
-1. **बुबा वा आमाको नेपाली नागरिकता प्रमाणपत्रको प्रतिलिपि** (दुवै भए अझ राम्रो)
-2. **सम्बन्धित वडामा दर्ता भएको जन्म दर्ता प्रमाणपत्र**
-3. **बसाईसराई गरी आएको भए बसाईसराईको आधिकारिक प्रमाणपत्र**
-4. **निवेदकको हालसालै खिचिएको ३ प्रति पासपोर्ट साइज फोटो**
-5. **सम्बन्धित व्यक्ति तथा सनाखत गर्ने बाबु/आमाको उपस्थिति**
+म तपाईंलाई **स्थानीय सरकार सञ्चालन ऐन, २०७४** तथा सार्वजनिक सेवा निर्देशिका अनुसार निम्न विषयहरूमा सहयोग गर्न सक्छु:
+• **नागरिकता सिफारिस** (वंशज, वैवाहिक अंगीकृत, NRN)
+• **बसोबास प्रमाणित** (स्थायी तथा बहाल सम्झौता)
+• **सडक सम्बन्धी कानून र मापदण्ड** (सार्वजनिक सडक ऐन २०३१, सडक खन्ने अनुमति)
+• **सार्वजनिक उजुरी तथा गुनासो दर्ता** (खाल्डाखुल्डी, ढल, खानेपानी चुहावट)
+• **व्यक्तिगत घटना दर्ता** (जन्म, विवाह, मृत्यु, बसाइँसराइ ३५ दिनभित्र निःशुल्क)
+• **भवन निर्माण तथा नक्सा पास** (सन्धिसर्पन, इजाजत र सम्पन्न प्रमाणपत्र)
+• **स्थानीय कर तथा व्यवसाय इजाजत** (घरबहाल कर १०%, सम्पत्ति कर)
+
+तपाईं कुन सेवा वा कानूनबारे जानकारी लिन चाहनुहुन्छ?`,
+      isSimulated: true
+    };
+  }
+
+  // 2. Nepal Road Laws & Standards (सडक सम्बन्धी कानुन, सार्वजनिक सडक ऐन, मापदण्ड)
+  const isRoadLawQuery = 
+    (q.includes("kanoon") || q.includes("kanun") || q.includes("law") || q.includes("act") || q.includes("niyam") || q.includes("rule") || q.includes("right of way") || q.includes("row") || q.includes("मापदण्ड") || q.includes("ऐन") || q.includes("कानून") || q.includes("कानुन") || q.includes("अधिकार")) &&
+    (q.includes("sadak") || q.includes("road") || q.includes("bato") || q.includes("सडक") || q.includes("बाटो"));
+
+  if (isRoadLawQuery) {
+    return {
+      text: `नमस्ते! नेपालमा सडक निर्माण, मर्मत, व्यवस्थापन र सडक क्षेत्रको संरक्षण सम्बन्धी मुख्य कानुनी व्यवस्था **सार्वजनिक सडक ऐन, २०३१** र **स्थानीय सरकार सञ्चालन ऐन, २०७४** मा आधारित छ:
+
+### १. सार्वजनिक सडक ऐन, २०३१ (Public Road Act, 1974)
+• **सडकको वर्गीकरण:** सडकलाई राष्ट्रिय राजमार्ग (National Highway), सहायक मार्ग (Feeder Road), जिल्ला सडक र सहरी/स्थानीय सडकमा वर्गीकरण गरिएको छ।
+• **सडक विभागको क्षेत्राधिकार:** राष्ट्रिय राजमार्ग र मुख्य रणनीतिक सडकहरूको निर्माण, मर्मत र अधिकार क्षेत्र (Right of Way - RoW) सडक विभाग (Department of Roads - DoR) मातहत रहन्छ।
+• **सडक अतिक्रमण निषेध (Anti-Encroachment):** सडकको सीमाभित्र कुनै पनि स्थायी वा अस्थायी संरचना बनाउन, सामान थुपार्न वा अवरोध गर्न पाइँदैन।
+• **सडक खन्ने अनुमति (Road Cutting Permission):** खानेपानी, ढल, बिजुली वा अप्टिकल फाइबरका लागि सडक खन्नुअघि सम्बन्धित सडक निकायबाट अनिवार्य अनुमति लिनुपर्छ र पुनर्मर्मत (Reinstatement) शुल्क बुझाउनुपर्छ।
+
+### २. स्थानीय सरकार सञ्चालन ऐन, २०७४ (Local Government Operation Act, 2017)
+• **दफा ११ र १२ (स्थानीय तह तथा वडाको एकल अधिकार):**
+  - नगर/गाउँस्तरीय सडक, ग्रामीण सडक, कृषि सडक तथा वडाभित्रका भित्री शाखा बाटोहरूको निर्माण, मर्मतसम्भार र स्तरोन्नतिको पूर्ण अधिकार स्थानीय सरकार (महानगरपालिका/नगरपालिका/गाउँपालिका) लाई छ।
+  - वडा कार्यालयले आफ्नो क्षेत्रभित्रका सडकहरूको लगत राख्ने, खाल्डाखुल्डी मर्मत गर्ने, सडक बत्ती व्यवस्थापन गर्ने र अतिक्रमण नियन्त्रण गर्ने जिम्मा पाएको छ।
+• **सडक मापदण्ड र Setback:** भवन निर्माण गर्दा सडकको केन्द्र रेखा (Centerline) बाट तोकिएको न्यूनतम दूरी (Setback) छाड्नु कानुनी रूपमा अनिवार्य छ।
+
+### ३. उजुरी तथा मर्मत प्रक्रिया:
+स्थानीय सडकमा खाल्डाखुल्डी, ढल वा पहिरो भएमा नागरिकले हाम्रो पोर्टलको **'Lodge Complaint'** बटनबाट वा काठमाडौँ महानगरको **कल सेन्टर ११८०** मा सिधै उजुरी गर्न सक्छन्।`,
+      isSimulated: true
+    };
+  }
+
+  // 3. Potholes / Damage / Public Grievance Lodging (सडक खाल्डाखुल्डी, ढल, खानेपानी चुहावट)
+  if (
+    q.includes("khaldokhuldi") || 
+    q.includes("khaldo") || 
+    q.includes("pothole") || 
+    q.includes("खाल्डो") || 
+    q.includes("खाल्डाखुल्डी") || 
+    q.includes("उजुरी") || 
+    q.includes("complaint") || 
+    q.includes("lodge") || 
+    q.includes("damage") ||
+    q.includes("leak") ||
+    q.includes("ढल") ||
+    q.includes("खानेपानी") ||
+    q.includes("पानी") ||
+    q.includes("fohor") ||
+    q.includes("waste") ||
+    q.includes("फोहर")
+  ) {
+    return {
+      text: `नमस्ते! जनसेवा पोर्टलमा सार्वजनिक समस्या तथा उजुरी (Public Grievance) सिधै दर्ता गर्न सकिन्छ:
+
+१. **'Lodge Complaint'** बटन थिच्नुहोस् वा सिधै गुनासो फारम खोल्नुहोस्।
+२. **समस्याको प्रकार छान्नुहोस्:**
+   - सडक खाल्डाखुल्डी / पूर्वाधार (Road & Infrastructure)
+   - खानेपानी चुहावट / ढल जाम (Drinking Water & Sewage - KUKL)
+   - फोहर संकलन तथा दुर्गन्ध (Sanitation & Waste)
+   - सडक बत्ती / जोखिमपूर्ण पोल (Streetlights / Electricity)
+३. **स्थान तथा विवरण:** घटना भएको स्थान (जस्तै: बालुवाटार चोक, वडा नं ४) र स्थलगत फोटो अपलोड गर्नुहोस्।
+४. **एआई प्राथमिकता (AI Smart Triage):** हाम्रो प्रणालीले जोखिमका आधारमा प्राथमिकता (Emergency / High / Medium) निर्धारण गरी सम्बन्धित शाखा (KMC Road Division वा KUKL) मा स्वचालित प्रेषण गर्दछ।
+
+📌 उजुरी दर्ता हुनासाथ तपाईंलाई **CMP-TRK ट्र्याकिङ कोड** प्राप्त हुन्छ, जसबाट प्रगतिको अवस्था प्रत्यक्ष हेर्न सकिन्छ। आपतकालीन अवस्थामा महानगरको हटलाइन **११८०** मा समेत सम्पर्क गर्न सक्नुहुन्छ।`,
+      isSimulated: true
+    };
+  }
+
+  // 4. Citizenship Recommendation (नागरिकता सिफारिस)
+  if (q.includes("nagarikta") || q.includes("citizenship") || q.includes("नागरिकता") || q.includes("सिफारिस")) {
+    return {
+      text: `नमस्ते! नयाँ नागरिकता सिफारिस (Citizenship Recommendation) का लागि **नेपाल नागरिकता ऐन, २०६३** तथा वडा कार्यविधि अनुसार आवश्यक विवरण यस प्रकार छन्:
+
+### आवश्यक कागजातहरू (Required Documents):
+१. **बुबा वा आमाको नेपाली नागरिकता प्रमाणपत्रको प्रतिलिपि** (दुवै भए अझ राम्रो)
+२. **सम्बन्धित स्थानीय तहबाट जारी जन्म दर्ता प्रमाणपत्र** (Birth Certificate)
+३. **बसाइँसराइ गरी आएको भए बसाइँसराइको आधिकारिक प्रमाणपत्र** (Migration Certificate)
+४. **निवेदकको हालसालै खिचिएको ३ प्रति पासपोर्ट साइज फोटो**
+५. **शैक्षिक प्रमाणपत्र (कम्तिमा कक्षा ८ वा SEE को चारित्रिक प्रमाणपत्र भएमा)**
+६. **सम्बन्धित व्यक्ति तथा सनाखत गर्ने बाबु/आमा वा एकाघरको व्यक्तिको उपस्थिति**
 
 📌 **लाग्ने समय:** १ देखि २ कार्यदिन  
 📌 **सरकारी दस्तुर:** रु. १०० (वडा कार्यालय)  
-📌 **प्रक्रिया:** वडाबाट सिफारिस प्राप्त भएपछि जिल्ला प्रशासन कार्यालय (DAO Babarmahal / सम्बन्धित जिल्ला) मा गई बायोमेट्रिक र नागरिकता कार्ड प्राप्त गर्न सकिन्छ।
+📌 **प्रक्रिया:** वडा कार्यालयबाट सिफारिस पत्र प्राप्त भएपछि जिल्ला प्रशासन कार्यालय (DAO - Babarmahal / सम्बन्धित जिल्ला) मा गई बायोमेट्रिक र नागरिकता कार्ड लिन सकिन्छ।
 
-तपाईं सिधै **'Citizen Portal' -> 'Apply Now'** मा गई अनलाइन फारम भर्न सक्नुहुन्छ!`,
+तपाईं हाम्रो पोर्टलको **'Citizen Portal' -> 'Apply Now'** मा गई अनलाइन सिफारिस फारम पेश गर्न सक्नुहुन्छ!`,
       isSimulated: true
     };
   }
 
+  // 5. Residence Verification (बसोबास प्रमाणित)
   if (q.includes("basobas") || q.includes("residence") || q.includes("बसोबास") || q.includes("ghar")) {
     return {
-      text: `नमस्ते! बसोबास प्रमाणित सिफारिस (Residence Verification Certificate) को लागि प्रक्रिया यस प्रकार छ:
+      text: `नमस्ते! बसोबास प्रमाणित सिफारिस (Residence Verification Certificate) को लागि प्रक्रिया तथा आवश्यक कागजातहरू:
 
-• **स्थायी बसोबासका लागि:**
-  - जग्गाधनी प्रमाणपुर्जा (लालपुर्जा) को प्रतिलिपि
+• **स्थायी बसोबासका लागि (Permanent Residence):**
+  - जग्गाधनी प्रमाणपुर्जा (लालपुर्जा) को प्रमाणित प्रतिलिपि
   - चालु आर्थिक वर्षको सम्पत्ति/घरजग्गा कर चुक्ता गरेको रसिद
-  - निवेदकको नागरिकता प्रमाणपत्र
-  - खानेपानी वा बिजुलीको पछिल्लो महिनाको महसुल रसिद
+  - निवेदकको नेपाली नागरिकता प्रमाणपत्र
+  - खानेपानी वा नेपाल विद्युत प्राधिकरण (NEA) को पछिल्लो महसुल रसिद
 
-• **अस्थायी (बहाल/भाडा) बसोबासका लागि:**
-  - घरधनीसँग गरिएको कम्तिमा १ वर्षको बहाल सम्झौता (Rent Agreement)
+• **अस्थायी वा बहाल बसोबासका लागि (Tenant / Rent):**
+  - घरधनीसँग गरिएको कम्तिमा १ वर्षको बहाल सम्झौता (House Rent Agreement)
   - घरधनीको नागरिकता र लालपुर्जाको प्रतिलिपि
+  - घरधनीले वडामा १०% बहाल कर बुझाएको प्रमाण
   - निवेदकको नागरिकता प्रतिलिपि
 
 📌 **सरकारी दस्तुर:** रु. २००  
-📌 **समय:** सोही दिन वा १ कार्यदिन भित्र।`,
+📌 **लाग्ने समय:** सोही दिन वा १ कार्यदिन भित्र जारी हुन्छ।`,
       isSimulated: true
     };
   }
 
-  if (q.includes("complaint") || q.includes("sadak") || q.includes("water") || q.includes("ढल") || q.includes("गुनासो") || q.includes("फोहर")) {
+  // 6. Building Permit & Blueprint Approval (नक्सा पास)
+  if (q.includes("naksa") || q.includes("map") || q.includes("building") || q.includes("ghar nirman") || q.includes("नक्सा") || q.includes("भवन निर्माण")) {
     return {
-      text: `नमस्ते! जनसेवा पोर्टलमा सार्वजनिक समस्या तथा उजुरी सिधै दर्ता गर्न सकिन्छ:
+      text: `नमस्ते! स्थानीय तहमा भवन निर्माण इजाजत तथा नक्सा पास (Building Map Approval) सम्बन्धी ५-चरणीय कानुनी प्रक्रिया:
 
-१. हाम्रो **'Lodge Complaint'** बटन थिच्नुहोस्।
-२. समस्याको प्रकार (सडक खाल्डाखुल्डी, खानेपानी चुहावट, फोहर संकलन, वा ढल निकास) छान्नुहोस्।
-३. घटना भएको स्थान (जस्तै: बालुवाटार चोक, वडा नं ४) र आवश्यक भए फोटो अपलोड गर्नुहोस्।
-४. हाम्रो **डिजिटल एआई प्रणाली**ले स्वतः प्राथमिकता (Emergency / High / Medium) निर्धारण गरी सम्बन्धित शाखा वा KUKL/सडक विभागमा पठाउनेछ।
+१. **प्रारम्भिक निवेदन:** नेपाल इन्जिनियरिङ काउन्सिलमा दर्ता भएको इन्जिनियरबाट तयार गरिएको आर्किटेक्चरल/स्ट्रक्चरल नक्सा, लालपुर्जा, र कित्तानापी नक्सा (Trace Map)।
+२. **सन्धिसर्पन सूचना (१५ दिने सार्वजनिक सूचना):** साँध-सिमानाका छिमेकीहरूलाई कुनै बाधा-विरोध छ कि भनी १५ दिनको म्याद दिइन्छ।
+३. **अस्थायी इजाजत (Plinth Level):** डीपीसी (DPC) सम्म निर्माण गर्न अस्थायी स्वीकृति।
+४. **प्राविधिक निरीक्षण:** वडा तथा महानगरका प्राविधिकद्वारा भूकम्पीय मापदण्ड र Setback को स्थलगत प्रमाणीकरण।
+५. **स्थायी निर्माण सम्पन्न प्रमाणपत्र:** भवन सम्पन्न भएपछि स्थायी प्रयोग इजाजत (Building Completion Certificate) जारी हुन्छ।
 
-तपाईंले पाउने **CMP-TRK कोड** मार्फत कारबाहीको अवस्था प्रत्यक्ष हेर्न सक्नुहुन्छ।`,
+📌 **शुल्क:** प्लिन्थ एरिया अनुसार रु. २५ देखि रु. ६० प्रति वर्गमिटर।`,
       isSimulated: true
     };
   }
 
-  if (q.includes("tax") || q.includes("कर") || q.includes("pan") || q.includes("business")) {
+  // 7. Vital Event Registration (जन्म, मृत्यु, विवाह, बसाइँसराइ दर्ता)
+  if (q.includes("birth") || q.includes("marriage") || q.includes("death") || q.includes("vivah") || q.includes("janma") || q.includes("दर्ता") || q.includes("घटना दर्ता")) {
     return {
-      text: `नमस्ते! व्यवसाय दर्ता तथा कर सम्बन्धी जानकारी:
+      text: `नमस्ते! **व्यक्तिगत घटना दर्ता ऐन, २०३३** तथा कार्यविधि अनुसार जन्म, मृत्यु, विवाह, बसाइँसराइ र सम्बन्ध विच्छेद दर्ता सम्बन्धी नियमहरू:
 
-• **साना व्यवसाय दर्ता (Small Business Registration):**
+• **३५ दिनको कानुनी सुविधा:**
+  घटना घटेको **३५ दिनभित्र** वडा कार्यालयमा दर्ता गराउँदा कुनै पनि सरकारी दस्तुर लाग्दैन (**पूर्णतः निःशुल्क**)।
+• **३५ दिन कटेमा:** रु. ५० देखि २०० सम्म बिलम्ब शुल्क (Late Fine) लाग्छ।
+
+**आवश्यक प्रमाणहरू:**
+- **जन्म दर्ता:** अस्पतालको जन्म डिस्चार्ज प्रमाणपत्र, बाबु-आमाको नागरिकता र विवाह दर्ता।
+- **विवाह दर्ता:** दुलहा-दुलही दुवैको नागरिकता, विवाहको फोटो, र दुवै पक्षको उपस्थिति।
+- **मृत्यु दर्ता:** मृतकको नागरिकता, अस्पतालको मृत्यु घोषणा पत्र वा मुचुल्का, र सूचकको नागरिकता।
+- **बसाइँसराइ:** साविक ठेगानाको बसाइँसराइ दर्ता प्रमाणपत्र र हालको बसोबास प्रमाण (लालपुर्जा/बहाल)।`,
+      isSimulated: true
+    };
+  }
+
+  // 8. Business & Municipal Tax (व्यवसाय दर्ता, घरबहाल कर १०%, सम्पत्ति कर)
+  if (q.includes("tax") || q.includes("कर") || q.includes("pan") || q.includes("business") || q.includes("व्यवसाय") || q.includes("बहाल कर") || q.includes("rent")) {
+    return {
+      text: `नमस्ते! व्यवसाय दर्ता तथा स्थानीय कर सम्बन्धी जानकारी:
+
+• **साना व्यवसाय दर्ता (Small Business / Trade License):**
   - सञ्चालकको नागरिकता प्रतिलिपि (२ प्रति)
-  - व्यवसाय रहने स्थानको घर बहाल सम्झौता वा लालपुर्जा
-  - आन्तरिक राजस्व कार्यालय (IRD) बाट जारी स्थायी लेखा नम्बर (PAN) प्रमाणपत्र
+  - व्यवसाय स्थलको घर बहाल सम्झौता वा जग्गाधनी लालपुर्जा
+  - आन्तरिक राजस्व कार्यालय (IRD) को स्थायी लेखा नम्बर (PAN) प्रमाणपत्र
   - २ प्रति पासपोर्ट साइज फोटो
+  - दस्तुर: पुँजी अनुसार रु. १,५०० देखि रु. ५,००० सम्म।
 
-📌 **दस्तुर:** पुँजी अनुसार रु. १,५०० देखि रु. ५,००० सम्म।  
-चालु आर्थिक वर्षको सम्पत्ति कर समयमै बुझाउँदा १०% सम्म छुटको व्यवस्था रहेको छ।`,
+• **घरबहाल कर (House Rent Tax):**
+  - **काठमाडौँ महानगरपालिका राजस्व ऐन, २०८०** अनुसार घर बहाल रकमको **१०% बहाल कर** स्थानीय वडा कार्यालयमा बुझाउनुपर्छ।
+• **सम्पत्ति कर (Property Tax):**
+  - चालु आर्थिक वर्षको पुस मसान्तभित्र सम्पत्ति कर बुझाउँदा **१०% छुट** को सुविधा प्राप्त हुन्छ।`,
       isSimulated: true
     };
   }
 
+  // 9. Judicial Committee / Dispute Resolution (न्यायिक समिति तथा मेलमिलाप)
+  if (q.includes("dispute") || q.includes("court") || q.includes("samiti") || q.includes("विवाद") || q.includes("झगडा") || q.includes("न्यायिक समिति") || q.includes("मेलमिलाप")) {
+    return {
+      text: `नमस्ते! **स्थानीय सरकार सञ्चालन ऐन, २०७४ को परिच्छेद-८ (दफा ४६-५३)** बमोजिम स्थानीय तहमा उपप्रमुख/उपाध्यक्षको संयोजकत्वमा ३ सदस्यीय **न्यायिक समिति (Judicial Committee)** रहने व्यवस्था छ।
+
+**न्यायिक समितिको क्षेत्राधिकार:**
+• आलीधुर, सिमाना, र बाँधपैनी सम्बन्धी विवाद
+• घरबहाल, भाडा, र घर खाली गराउने विषय
+• ज्यालामजुरी नदिएको वा बाटो निकास रोकेको सम्बन्धी विवाद
+• जेष्ठ नागरिक, बालबालिका, वा पारिवारिक अंश-झगडा
+
+📌 प्रक्रिया: वडा कार्यालयमा दर्ता भएको निवेदनलाई सूचीकृत मेलमिलापकर्ता (Certified Mediator) मार्फत आपसी सहमतिमा निःशुल्क समाधान गरिन्छ।`,
+      isSimulated: true
+    };
+  }
+
+  // Default authoritative municipal fallback
   return {
-    text: `नमस्ते! म जनसेवा एआई नेपाल (JanSewa AI Nepal) को डिजिटल सेवा सहायक हुँ। 
+    text: `नमस्ते! म जनसेवा एआई नेपाल (JanSewa AI Nepal) को डिजिटल सेवा सहायक हुँ।
+
 तपाईंले मलाई वडा कार्यालय, नगरपालिका तथा जिल्ला प्रशासन कार्यालय (DAO) बाट उपलब्ध हुने सेवाहरू, जस्तै:
-• **नागरिकता सिफारिस**
-• **बसोबास प्रमाणित**
-• **जन्म, विवाह, बसाईसराई दर्ता**
-• **सम्पत्ति कर तथा व्यवसाय इजाजत**
-• **सडक, खानेपानी र फोहर सम्बन्धी सार्वजनिक गुनासो दर्ता**
+• **नागरिकता सिफारिस तथा कागजात**
+• **बसोबास प्रमाणित तथा बहाल सम्झौता**
+• **सडक सम्बन्धी नेपाल कानून र सडक मापदण्ड** (सार्वजनिक सडक ऐन २०३१, स्थानीय सरकार सञ्चालन ऐन २०७४)
+• **सार्वजनिक उजुरी तथा सडक खाल्डाखुल्डी मर्मत**
+• **जन्म, विवाह, बसाइँसराइ दर्ता** (३५ दिनभित्र निःशुल्क)
+• **सम्पत्ति कर, व्यवसाय इजाजत तथा १०% बहाल कर**
+• **नक्सा पास तथा भवन निर्माण स्वीकृति**
 
 सम्बन्धी नियम, आवश्यक कागजात, दस्तुर र कार्यविधिको बारेमा नेपाली वा अंग्रेजीमा सोध्न सक्नुहुन्छ। तपाईंलाई कुन सेवाबारे बुझ्न मन छ?`,
     isSimulated: true
@@ -350,10 +558,10 @@ export async function classifyComplaintWithGemini(title, description, location) 
   }
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    return await callGeminiWithFallback(apiKey, async (genAI, modelName) => {
+      const model = genAI.getGenerativeModel({ model: modelName });
 
-    const prompt = `
+      const prompt = `
 You are the AI Public Grievance Classifier for Kathmandu Metropolitan City / Nepal Local Government.
 Analyze the following citizen complaint:
 Title: "${title}"
@@ -379,11 +587,12 @@ Return ONLY a strict JSON object:
 }
 `;
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().replace(/```json/g, "").replace(/```/g, "").trim();
-    return JSON.parse(text);
+      const result = await model.generateContent(prompt);
+      const text = result.response.text().replace(/```json/g, "").replace(/```/g, "").trim();
+      return JSON.parse(text);
+    });
   } catch (err) {
-    console.warn("Live complaint classification failed, using domain fallback:", err);
+    console.warn("Live complaint classification fallback to rule-based triage:", err);
     return simulateComplaintClassification(title, description, location);
   }
 }
@@ -445,10 +654,10 @@ export async function generatePredictiveInsights(historicalData) {
   }
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    return await callGeminiWithFallback(apiKey, async (genAI, modelName) => {
+      const model = genAI.getGenerativeModel({ model: modelName });
 
-    const prompt = `
+      const prompt = `
 You are the Data Science & Predictive Analytics advisor for JanSewa AI Nepal.
 Given historical monthly application volumes:
 ${JSON.stringify(historicalData)}
@@ -470,9 +679,10 @@ Return ONLY strict JSON:
 }
 `;
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().replace(/```json/g, "").replace(/```/g, "").trim();
-    return JSON.parse(text);
+      const result = await model.generateContent(prompt);
+      const text = result.response.text().replace(/```json/g, "").replace(/```/g, "").trim();
+      return JSON.parse(text);
+    });
   } catch (err) {
     return {
       forecastNextMonth: 345,
